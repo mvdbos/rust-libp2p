@@ -11,7 +11,7 @@ const LISTEN_PORT_BASE: u16 = 63000;
 
 #[derive(Parser, Debug)]
 #[clap(name = "MyChat networking example")]
-pub struct Cli {
+pub struct MyChatCliArgs {
     /// Fixed value to generate deterministic peer ID.
     #[clap(long, short)]
     pub peer_no: u8,

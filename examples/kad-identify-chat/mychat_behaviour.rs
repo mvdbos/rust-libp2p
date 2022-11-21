@@ -40,9 +40,8 @@ const KADEMLIA_PROTO_NAME: &[u8] = b"/my-chat/kad/1.0.0";
 const IDENTIFY_PROTO_NAME: &str = "/my-chat/ide/1.0.0";
 const GOSSIPSUB_PROTO_ID_PREFIX: &str = "my-chat/gossipsub";
 
-/// This is a bigger example application that uses the
+/// This behaviour composes multiple behaviours. It uses the
 /// Identify and Kademlia behaviours for peer discovery.
-///
 /// For the chat functionality, it uses Gossipsub and
 /// RequestResponse behaviours.
 ///
