@@ -13,20 +13,25 @@ use crate::network::{Address, Instruction, Notification};
 use crate::cli::keypair_from_peer_no;
 use serde::{Serialize, Deserialize};
 
-pub struct NetworkClient {
+/// The `NetworkClient` ireads user input from standard input and transforms it
+/// into `Instruction`s. It then sends the `Instruction` on the mpsc channel that the `Network`
+/// listens to.
+///
+/// It receives `Notification`s from the `Network` on the notification channel.
+pub struct MyChatNetworkClient {
     peer_id: PeerId,
     instruction_tx: mpsc::UnboundedSender<Instruction>,
     notification_rx: mpsc::UnboundedReceiver<Notification>,
     stdin: Lines<BufReader<Stdin>>,
 }
 
-impl NetworkClient {
+impl MyChatNetworkClient {
     pub fn new(
         peer_id: PeerId,
         instruction_tx: mpsc::UnboundedSender<Instruction>,
         notification_rx: mpsc::UnboundedReceiver<Notification>,
-    ) -> NetworkClient {
-        NetworkClient {
+    ) -> MyChatNetworkClient {
+        MyChatNetworkClient {
             peer_id,
             instruction_tx,
             notification_rx,
@@ -64,7 +69,7 @@ impl NetworkClient {
             let split: Vec<&str> = input.split_whitespace().collect();
             let message = Message::DirectMessage {
                 source: local_peer_id,
-                data: split[2].into(),
+                data: split[2..].join(" ")
             };
 
             Self::send_dm_to_peer_no(
@@ -152,7 +157,7 @@ impl NetworkClient {
         message: Message,
     ) -> anyhow::Result<()> {
         let instruction = Instruction::Send {
-            destination: Address::Single(to_peer_id.clone()),
+            destination: Address::DirectMessage(to_peer_id.clone()),
             message: bincode::serialize(&message)?.into(),
         };
         instruction_tx.send(instruction)?;

@@ -18,6 +18,24 @@ pub mod network_builder;
 pub mod instruction_handler;
 pub mod event_handler;
 
+///
+/// The `Network` is a convenience wrapper around the `Swarm` for a `NetworkBehaviour`.
+/// It can be constructed with the `NetworkBuilder` for convenience.
+///
+/// Communication between the `Network` and its client(s) happens only through mpsc channels,
+/// and is fully async.
+///
+///
+/// The `Network`:
+/// - receives `Instructions`, which it passes on to the `InstructionHandler` trait implemented
+///   on the swarm's NetworkBehaviour.
+/// - receives events from the swarm and passes them on to the `EventHandler` trait implemented
+///   on the swarm's `NetworkBehaviour`. The `EventHandler` can notify the `Network`'s client
+///   by sending a `Notification`.
+///
+/// The `Network` does not know or care what the Instructions and Notifications contain. It is up to
+/// the client(s) to give them meaning.
+///
 pub struct Network<TBehaviour>
     where
         TBehaviour: NetworkBehaviour,
@@ -70,7 +88,8 @@ pub enum Instruction {
     PeerList,
 }
 
-/// A notification from the network to one of its consumers. Either data, or an error
+/// A notification from the network to one of its consumers.
+/// Either arbitrary data, the list of known peers or an error.
 #[derive(Debug)]
 pub enum Notification {
     Data(Bytes),
@@ -87,8 +106,7 @@ pub struct Message<T: Debug + Clone> {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Address<A: Debug + Clone> {
     Broadcast,
-    Multiple(Vec<A>),
-    Single(A),
+    DirectMessage(A),
 }
 
 #[derive(Debug, Error)]

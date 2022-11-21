@@ -168,12 +168,7 @@ impl MyChatNetworkBehaviour {
 
     fn send(&mut self, destination: Address<PeerId>, message: Bytes) -> Result<(), NetworkError> {
         match destination {
-            Address::Single(peer_id) => self.send_single(&peer_id, &message)?,
-            Address::Multiple(peers) => {
-                for peer_id in &peers {
-                    self.send_single(peer_id, &message)?
-                }
-            }
+            Address::DirectMessage(peer_id) => self.send_single(&peer_id, &message)?,
             Address::Broadcast => {
                 log::debug!("Broadcasting: {message:?}");
                 if let Err(error) = self
@@ -251,11 +246,11 @@ impl MyChatNetworkBehaviour {
                 request_id,
             } => {
                 if response.0 == Bytes::from_static(mychat_direct_message_protocol::ACK_MESSAGE) {
-                    log::debug!(
+                    log::info!(
                         "Received message reception confirmation from peer {} for request {}",
                         peer_id,
                         request_id
-                    )
+                    );
                 } else {
                     log::error!(
                         "Unexpected payload for message reception confirmation from peer {} for request {}: {:?}",
